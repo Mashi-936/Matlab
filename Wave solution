@@ -1,0 +1,67 @@
+function u=waveSolution(f,h,k,T)
+
+
+L=1; % length of x
+deltat=T/(k-1); % length of x steps
+deltax=L/(h-1);% length of time steps
+
+% computing the coefficient of the eq.3
+h_time_sqr=1/(deltat^2);    
+h_x_sqr=1/(deltax^2);
+
+% first we have created the submatrix of A which are K and I 
+% also use the lecture notes you have sent me it was 4*4 matrix at task 1
+% because h was 6 but generally it should be size of h-2
+K=zeros(h-2,h-2);
+I=zeros(h-2,h-2);
+for i=1:h-2
+    K(i,i)=-2*(h_time_sqr-h_x_sqr); % coefficient comes from eq 3 please do it yourself
+    if(i>1)
+        K(i,i-1)=-1*h_x_sqr;
+    end
+    if(i<h-2)
+         K(i,i+1)=-1*h_x_sqr;
+   end
+end
+new=h_time_sqr*ones(h-2,1);
+I=diag(new);
+
+% by using this matrix we have generated the A matrix by adding 
+% K and I submatrices to the apropriate places 
+A=zeros(k*(h-2),k*(h-2));
+for i=0:k-1
+   
+        A((h-2)*i+1:(h-2)*i+(h-2),(h-2)*i+1:(h-2)*i+h-2)=K;
+        if(i>0)
+            A((h-2)*(i)+1:(h-2)*(i)+h-2,(h-2)*(i-1)+1:(h-2)*(i-1)+h-2)=I;
+        end
+        if(i<k-1)
+            A((h-2)*(i)+1:(h-2)*(i)+h-2,(h-2)*(i+1)+1:(h-2)*(i+1)+h-2)=I;
+        end
+end
+        
+% we have generated the b matrix first h-2 coloums is non zero because this
+% values coming from the initial condition please find it by explicitly
+% writing the eq.3 (where use h_time_sqr istead of 25^2 and h_x_sqr instead of 25  )   
+b=zeros(k*(h-2),1);
+for i=1:h-2
+    b(i)=-1*f(i*deltax)*h_time_sqr;
+end
+
+% finding solution
+u=A\b;
+
+% res is the matrix we have add also boudries 
+res=zeros(h,k);
+
+for i=1:k-1
+    for j=2:h-1
+        res(j,i+1)=u((i-1)*4+j-1);
+    end
+end
+res(2:h-1,1)=-1*b(1:h-2)/h_time_sqr;
+
+% lastly u is returned as res
+u=res;
+
+end
